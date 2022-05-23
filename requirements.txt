@@ -1,0 +1,7 @@
+pymongo==3.11.2
+requests==2.25.1
+lxml==4.6.2
+stringcase==1.2.0
+pandas==1.3.5
+git+https://github.com/jenslaufer/pyuseragents
+git+https://github.com/jenslaufer/scrpproxies
