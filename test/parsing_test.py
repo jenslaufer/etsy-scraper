@@ -22,4 +22,4 @@ class SearchParserTest(unittest.TestCase):
     def test_results(self):
         results = self.search_parser.parse(self.search_results_content)
         logging.debug(results)
-        self.assertEquals(95, len(results["products"]))
+        self.assertEquals("bla", results[0]["title"])
