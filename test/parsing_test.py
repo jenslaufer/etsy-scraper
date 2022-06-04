@@ -22,4 +22,11 @@ class SearchParserTest(unittest.TestCase):
     def test_results(self):
         results = self.search_parser.parse(self.search_results_content)
         logging.debug(results)
-        self.assertEquals("bla", results[0]["title"])
+        self.assertEquals(
+            "Personal Trainer Program Template Forms BUNDLE / Measurement Forms / Food Journal / Google Sheets /  Fitness Instructor Programming", results["products"][1]["title"])
+        self.assertEquals(26.74, results["products"][1]["price"])
+        self.assertEquals(4.8537, results["products"][1]["rating"])
+        self.assertEquals(41, results["products"][1]["num_ratings"])
+        self.assertEquals(1174291147, results["products"][1]["listing_id"])
+        self.assertEquals(
+            "https://www.etsy.com/listing/1174291147/", results["products"][1]["url"])

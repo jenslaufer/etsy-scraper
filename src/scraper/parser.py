@@ -31,6 +31,7 @@ class SearchParser:
         price_xpath = ".//span[@class='currency-value']/text()"
         rating_xpath = ".//input[@name='rating']/@value"
         num_ratings_xpath = ".//span[contains(@class,'wt-text-body-01')]/text()"
+        listing_id_xpath = ".//div[@data-listing-id]/@data-listing-id"
 
         for product_section in doc.xpath(products_xpath):
             product = {}
@@ -62,6 +63,13 @@ class SearchParser:
                 product['num_ratings'] = num_ratings
             except Exception as e:
                 logging.warning(f"could not extract rating: {e}")
+
+            try:
+                listing_id = int(product_section.xpath(listing_id_xpath)[0])
+                product["listing_id"] = listing_id
+                product["url"] = f"https://www.etsy.com/listing/{listing_id}/"
+            except Exception as e:
+                logging.warning(f"could not extract listing_id: {e}")
 
             if len(product.keys()) > 0:
                 products.append(product)
