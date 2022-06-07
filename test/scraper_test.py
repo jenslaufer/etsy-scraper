@@ -22,6 +22,5 @@ class ScraperTest(TestCase):
         self.assertEquals(num_pages, len(pages))
         for page in pages:
             self.assertTrue(self.storage.exists(page))
-            print(self.storage.get_file_content(page))
             self.assertTrue(
                 "html" in self.storage.get_file_content(page).decode("utf-8"))
