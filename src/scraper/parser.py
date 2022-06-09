@@ -24,7 +24,7 @@ class SearchParser:
 
         return num_of_results
 
-    def _products(self, doc):
+    def _products(self, query, doc):
         products = []
         products_xpath = ".//li[contains(@class,'wt-list-unstyled')]"
         title_xpath = ".//a/@title"
@@ -72,12 +72,14 @@ class SearchParser:
                 logging.warning(f"could not extract listing_id: {e}")
 
             if len(product.keys()) > 0:
+                product["query"] = query
                 products.append(product)
 
         return products
 
-    def parse(self, content):
+    def parse(self, query, content):
         doc = html.fromstring(content)
         num_of_results = self._num_results(doc)
-        products = self._products(doc)
+        products = self._products(query, doc)
+
         return {"num_of_results": num_of_results, "products": products}

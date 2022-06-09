@@ -64,7 +64,12 @@ class MongoStorage(Storage):
         files = list(files_col.find(criteria))
         return files
 
-    def save(self, collection_name, collection_identifier, data):
+    def save(self, collection_name, data):
+        collection = self.db[collection_name]
+        data['last_modified_date'] = datetime.datetime.utcnow()
+        collection.save(data)
+
+    def replace(self, collection_name, collection_identifier, data):
         collection = self.db[collection_name]
         data['last_modified_date'] = datetime.datetime.utcnow()
         collection.replace_one(

@@ -33,15 +33,16 @@ class Scraper:
 
         return content
 
-    def _parse_search_results(self, url):
-        content = self.storage.get_file_content(url)
-        result = self.search_parser.parse(content)
+    def _parse_search_results(self, query, search_url):
+        content = self.storage.get_file_content(search_url)
+        result = self.search_parser.parse(query, content)
         products = result["products"]
         for product in products:
-            self.storage.save(self.collection_name, {}, product)
-        return url
+            product["search_url"] = search_url
+            self.storage.save(self.collection_name, product)
+        return {"search_url": search_url, "products": products}
 
-    def scrape(self, keyword, num_pages=None, fetch=True):
+    def scrape(self, query, num_pages=None, fetch=True):
         futures = []
         pages = []
 
@@ -50,13 +51,13 @@ class Scraper:
                 num_pages = 1
 
             for page in range(0, num_pages):
-                search_url = self.search_url_templ.format(keyword, page)
+                search_url = self.search_url_templ.format(query, page)
                 pages.append(search_url)
-                futures.append(executor.submit(self._fetch, url=search_url))
+                futures.append(executor.submit(
+                    self._fetch, url=search_url))
 
                 if page == 0 and as_completed(futures):
-                    content = self._fetch(search_url)
-                    result = self.search_parser.parse(content)
+                    result = futures[0].result()
                     if num_pages is None:
                         num_pages = ceil(result["num_results"]/64)
 
@@ -65,6 +66,6 @@ class Scraper:
             with ThreadPoolExecutor(max_workers=self.num_parsing_workers) as executor:
                 for page in pages:
                     futures.append(executor.submit(
-                        self._parse_search_results, url=page))
+                        self._parse_search_results, query=query, search_url=page))
 
         return futures
