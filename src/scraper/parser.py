@@ -107,5 +107,13 @@ class DetailsParser(Parser):
                             0].replace(".", ""))
         except Exception as e:
             logging.warning(f"could not extract num_sales: {e}")
+        try:
+            shipping_cost_xpath = ".//div[@data-estimated-shipping]//span[@class='currency-value']/text()"
+            shipping_cost_str = doc.xpath(shipping_cost_xpath)[0]
+            shipping_cost = float(re.findall(self.num_regex, shipping_cost_str)[
+                                  0].replace(".", "").replace(",", "."))
 
-        return {"listing_id": listing_id, "num_sales": num_sales}
+        except Exception as e:
+            logging.warning(f"could not parse shipping cost: {e}")
+
+        return {"listing_id": listing_id, "num_sales": num_sales, "shipping_cost": shipping_cost}

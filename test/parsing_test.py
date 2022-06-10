@@ -51,5 +51,6 @@ class DetailsParserTest(unittest.TestCase):
         self.test_id = 815
 
     def test_details(self) -> None:
-        self.assertEqual({"listing_id": 815, "num_sales": 17165}, self.parser.parse(
+        self.assertEqual({"listing_id": 815, "num_sales": 17165,
+                          "shipping_cost": 2.91}, self.parser.parse(
             self.test_id, self.details_content))
