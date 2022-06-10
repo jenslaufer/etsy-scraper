@@ -1,7 +1,7 @@
 
 import context
 import unittest
-from scraper.parser import SearchParser
+from scraper.parser import SearchParser, DetailsParser
 import requests
 import logging
 
@@ -35,3 +35,21 @@ class SearchParserTest(unittest.TestCase):
         self.assertEquals(1174291147, results["products"][1]["listing_id"])
         self.assertEquals(
             "https://www.etsy.com/listing/1174291147/", results["products"][1]["url"])
+
+
+class DetailsParserTest(unittest.TestCase):
+
+    def setUp(self):
+        super().setUp()
+
+        logging.basicConfig(level=logging.DEBUG)
+
+        self.parser = DetailsParser()
+        with open("test/resources/details.html", "r") as f:
+            self.details_content = f.read()
+
+        self.test_id = 815
+
+    def test_details(self) -> None:
+        self.assertEqual({"listing_id": 815, "num_sales": 17165}, self.parser.parse(
+            self.test_id, self.details_content))
