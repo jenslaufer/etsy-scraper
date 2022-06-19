@@ -99,7 +99,7 @@ class DetailsParser(Parser):
     def parse(self, listing_id, content) -> dict:
         doc = html.fromstring(content)
 
-        num_sales = 0
+        num_sales = None
         try:
             num_sales_xpath = ".//span[@class = 'wt-text-caption']/text()"
             num_sales_str = doc.xpath(num_sales_xpath)[0]
@@ -107,6 +107,8 @@ class DetailsParser(Parser):
                             0].replace(".", ""))
         except Exception as e:
             logging.warning(f"could not extract num_sales: {e}")
+
+        shipping_cost = None
         try:
             shipping_cost_xpath = ".//div[@data-estimated-shipping]//span[@class='currency-value']/text()"
             shipping_cost_str = doc.xpath(shipping_cost_xpath)[0]

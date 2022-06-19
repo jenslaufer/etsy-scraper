@@ -1,8 +1,10 @@
 from asyncio import futures
+
+from sympy import product
 import context
 from unittest import TestCase
 from scraper.storage import MongoStorage
-from scraper.parser import SearchParser
+from scraper.parser import SearchParser, DetailsParser
 from scraper.providers import RequestsFetch, Fetch
 from scraper.scraper import Scraper
 from pymongo_inmemory import MongoClient as MongoClientInMemory
@@ -20,28 +22,28 @@ class ScraperTest(TestCase):
             RequestsFetch(),
             self.storage,
             SearchParser(),
+            DetailsParser(),
             collection_name=self.collection_name)
         self.query = "programming shirts"
+        self.expected_min_props = [
+            'title', 'price', 'listing_id', 'url', 'query', 'num_sales', 'shipping_cost']
 
     def test_scraping(self):
         num_pages = 2
         futures = self.scraper.scrape(
             self.query, num_pages=num_pages)
 
-        self.assertEquals(num_pages, len(futures))
+        self.assertEqual(len(futures), 24)
+
         if as_completed(futures):
             for future in futures:
-                result = future.result()
-                products = result["products"]
-                search_url = result["search_url"]
+                product = future.result()
+                listing_id = product["listing_id"]
 
-                self.assertTrue(self.storage.exists(search_url))
-                self.assertTrue(
-                    "html" in self.storage.get_file_content(search_url).decode("utf-8"))
-                self.assertTrue(len(products) > 1)
-                for product in products:
-                    url = product["url"]
-                    data = self.storage.find_by_criteria(
-                        self.collection_name, {"url": url})
+                stored_product = self.storage.find_by_criteria(
+                    self.collection_name, {"listing_id": listing_id})
 
-                    self.assertEqual(data[0]["url"], url)
+                product.pop("last_modified_date")
+
+                self.assertTrue(len(product.keys()) > 3)
+                self.assertDictContainsSubset(product, stored_product[0])

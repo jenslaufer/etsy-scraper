@@ -27,7 +27,11 @@ class Storage():
         pass
 
     @abstractmethod
-    def save(self, collection_name, collection_identifier, data):
+    def save(self, collection_name, data):
+        pass
+
+    @abstractmethod
+    def replace(self, collection_name, collection_identifier, data):
         pass
 
 
