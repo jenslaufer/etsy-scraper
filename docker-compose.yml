@@ -10,6 +10,9 @@ services:
      - MONGO_HOST=${MONGO_HOST}
      - MONGO_DB=${MONGO_DB}
      - LOG_LEVEL=${LOG_LEVEL}
+   tty: true
+   stdin_open: true
+   entrypoint: sh #"python app.py"
    ports:
      - 8084:5000
    depends_on:

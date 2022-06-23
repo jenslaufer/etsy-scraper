@@ -10,6 +10,9 @@ from eve import Eve
 
 debug = bool(os.environ.get('DEBUG', "True"))
 host = os.environ.get('HOST', '0.0.0.0')
+level = int(os.environ.get("LOG_LEVEL", 50))
+
+logging.basicConfig(level=level)
 
 mongo_host = os.environ.get("MONGO_HOST")
 mongo_db = os.environ.get("MONGO_DB")
@@ -20,5 +23,5 @@ with app.app_context():
     scraper = Scraper(RequestsFetch(), MongoStorage(app.data.driver.db),
                       SearchParser(), DetailsParser())
 
-if __annotations__ == "__main__":
+if __name__ == "__main__":
     app.run(host=host, debug=debug)
