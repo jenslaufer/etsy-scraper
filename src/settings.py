@@ -2,6 +2,7 @@
 
 import os
 import pymongo
+import logging
 
 DB_HOST = os.environ.get(
     'MONGODB_HOST')
@@ -9,6 +10,8 @@ DB_NAME = os.environ.get(
     'MONGODB_DATABASE')
 
 MONGO_URI = f'mongodb://{DB_HOST}/{DB_NAME}'
+logging.debug(MONGO_URI)
+
 
 PAGINATION_LIMIT = 10
 PAGINATION_DEFAULT = 5

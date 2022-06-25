@@ -7,12 +7,10 @@ services:
    volumes:
      - "./src:/app"
    environment:
-     - MONGO_HOST=${MONGO_HOST}
-     - MONGO_DB=${MONGO_DB}
+     - MONGODB_HOST=${MONGO_HOST}
+     - MONGODB_DATABASE=${MONGODB_DATABASE}
      - LOG_LEVEL=${LOG_LEVEL}
-   tty: true
-   stdin_open: true
-   entrypoint: sh #"python app.py"
+   entrypoint: "python app.py"
    ports:
      - 8084:5000
    depends_on:
