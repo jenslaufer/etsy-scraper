@@ -1,13 +1,14 @@
 import logging
-from datetime import date
-from datetime import datetime
-import time
 import random
-from scraper.providers import Fetch
-from scraper.parser import DetailsParser, SearchParser
-from scraper.storage import Storage
-from math import ceil
+import time
+import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import date, datetime
+from math import ceil
+
+from scraper.parser import DetailsParser, SearchParser
+from scraper.providers import Fetch
+from scraper.storage import Storage
 
 
 class Scraper:
@@ -67,13 +68,14 @@ class Scraper:
             if num_pages is None:
                 num_pages = 1
 
-            for page in range(0, num_pages):
-                search_url = self.search_url_templ.format(query, page)
+            for page in range(1, num_pages+1):
+                search_url = self.search_url_templ.format(
+                    urllib.parse.quote_plus(query), page)
                 pages.append(search_url)
                 futures.append(executor.submit(
                     self._fetch, url=search_url))
 
-                if page == 0 and as_completed(futures):
+                if page == 1 and as_completed(futures):
                     result = futures[0].result()
                     if num_pages is None:
                         num_pages = ceil(result["num_results"]/64)
