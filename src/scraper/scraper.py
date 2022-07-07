@@ -9,6 +9,7 @@ from math import ceil
 from scraper.parser import DetailsParser, SearchParser
 from scraper.providers import Fetch
 from scraper.storage import Storage
+from urllib import parse
 
 
 class Scraper:
@@ -70,7 +71,7 @@ class Scraper:
 
             for page in range(1, num_pages+1):
                 search_url = self.search_url_templ.format(
-                    urllib.parse.quote_plus(query), page)
+                    parse.quote(query.encode('utf8')), page)
                 pages.append(search_url)
                 futures.append(executor.submit(
                     self._fetch, url=search_url))

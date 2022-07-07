@@ -1,5 +1,3 @@
-from asyncio import futures
-
 import context
 from unittest import TestCase
 from scraper.storage import MongoStorage

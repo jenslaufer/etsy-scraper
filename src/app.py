@@ -17,6 +17,8 @@ logging.basicConfig(level=level)
 mongo_host = os.environ.get("MONGO_HOST")
 mongo_db = os.environ.get("MONGO_DB")
 
+executor = ThreadPoolExecutor(max_workers=10)
+
 app = Eve()
 
 with app.app_context():
@@ -29,9 +31,8 @@ def _scrape(query, num_pages=None):
 
 
 def insert_scrapes(scrapes):
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        for scrape in scrapes:
-            executor.submit(_scrape, query=scrape["query"], num_pages=2)
+    for scrape in scrapes:
+        executor.submit(_scrape, query=scrape["query"], num_pages=15)
 
 
 app.on_insert_scrapes += insert_scrapes
