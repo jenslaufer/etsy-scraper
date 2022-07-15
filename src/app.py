@@ -6,11 +6,14 @@ from scraper.parser import DetailsParser, SearchParser
 import logging
 from eve import Eve
 from concurrent.futures import ThreadPoolExecutor
+from scrpproxies.proxy import BonanzaProxy, StormProxiesProxy
 
 
 debug = bool(os.environ.get('DEBUG', "True"))
 host = os.environ.get('HOST', '0.0.0.0')
 level = int(os.environ.get("LOG_LEVEL", 50))
+num_fetch_workers = int(os.environ.get("NUM_SCRAPING_WORKERS", 50))
+proxy_ip = os.environ.get("PROXY_IP", 50)
 
 logging.basicConfig(level=level)
 
@@ -21,18 +24,28 @@ executor = ThreadPoolExecutor(max_workers=10)
 
 app = Eve()
 
+
+proxies = StormProxiesProxy(proxy_ip)
+logging.debug(f"num_fetch_workers: {num_fetch_workers}, proxy_ip: {proxy_ip}")
+
 with app.app_context():
-    scraper = Scraper(RequestsFetch(), MongoStorage(app.data.driver.db),
-                      SearchParser(), DetailsParser())
+    storage = MongoStorage(app.data.driver.db)
+    scraper = Scraper(RequestsFetch(), storage,
+                      SearchParser(), DetailsParser(),
+                      num_fetch_workers=num_fetch_workers)
 
 
-def _scrape(query, num_pages=None):
+def _scrape(scrape, num_pages=None):
+    query = scrape["query"]
     scraper.scrape(query, num_pages)
+
+    storage.replace("scrapes", )
 
 
 def insert_scrapes(scrapes):
     for scrape in scrapes:
-        executor.submit(_scrape, query=scrape["query"], num_pages=15)
+        scrape["status"] = "CREATED"
+        executor.submit(_scrape, scrape=scrape, num_pages=10)
 
 
 app.on_insert_scrapes += insert_scrapes

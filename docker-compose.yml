@@ -6,10 +6,13 @@ services:
    build: .
    volumes:
      - "./src:/app"
+     - "./proxylist.csv:/app/proxylist.csv"
    environment:
      - MONGODB_HOST=${MONGO_HOST}
      - MONGODB_DATABASE=${MONGODB_DATABASE}
      - LOG_LEVEL=${LOG_LEVEL}
+     - NUM_SCRAPING_WORKERS=3
+     - PROXY_IP="83.149.70.159:13012"
    entrypoint: "python app.py"
    ports:
      - 8084:5000

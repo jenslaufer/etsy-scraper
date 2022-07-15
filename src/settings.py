@@ -31,7 +31,8 @@ EXTRA_RESPONSE_FIELDS = ["runtime"]
 
 scrapes = {
     'schema': {
-        'query': {'type': "string", "required": True}
+        'query': {'type': "string", "required": True},
+        'status': {'type': 'string', 'allowed': ['CREATED', 'PROCESSED', 'ERROR']}
     }
 }
 
