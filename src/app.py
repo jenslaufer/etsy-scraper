@@ -6,14 +6,13 @@ from scraper.parser import DetailsParser, SearchParser
 import logging
 from eve import Eve
 from concurrent.futures import ThreadPoolExecutor
-from scrpproxies.proxy import BonanzaProxy, StormProxiesProxy
+from scrpproxies.proxy import MultipleIpProxy
 
 
 debug = bool(os.environ.get('DEBUG', "True"))
 host = os.environ.get('HOST', '0.0.0.0')
 level = int(os.environ.get("LOG_LEVEL", 50))
 num_fetch_workers = int(os.environ.get("NUM_SCRAPING_WORKERS", 50))
-proxy_ip = os.environ.get("PROXY_IP", 50)
 
 logging.basicConfig(level=level)
 
@@ -24,9 +23,10 @@ executor = ThreadPoolExecutor(max_workers=10)
 
 app = Eve()
 
+proxies = MultipleIpProxy("proxylist.csv")
 
-proxies = StormProxiesProxy(proxy_ip)
-logging.debug(f"num_fetch_workers: {num_fetch_workers}, proxy_ip: {proxy_ip}")
+logging.debug(
+    f"num_fetch_workers: {num_fetch_workers}, proxy_ip: {proxies.get()}")
 
 with app.app_context():
     storage = MongoStorage(app.data.driver.db)
