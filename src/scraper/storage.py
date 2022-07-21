@@ -34,6 +34,10 @@ class Storage():
     def replace(self, collection_name, collection_identifier, data):
         pass
 
+    @abstractmethod
+    def remove(self, collection_name, collection_identifier):
+        pass
+
 
 class MongoStorage(Storage):
     FS_FILES = "fs.files"
@@ -78,3 +82,7 @@ class MongoStorage(Storage):
         data['last_modified_date'] = datetime.datetime.utcnow()
         collection.replace_one(
             collection_identifier, data, upsert=True)
+
+    def remove(self, collection_name, collection_identifier):
+        collection = self.db[collection_name]
+        collection.remove(collection_identifier)
