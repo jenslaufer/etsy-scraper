@@ -1,3 +1,4 @@
+from asyncio import as_completed
 import os
 from scraper.scraper import Scraper
 from scraper.providers import RequestsFetch
@@ -16,9 +17,6 @@ num_fetch_workers = int(os.environ.get("NUM_SCRAPING_WORKERS", 50))
 
 logging.basicConfig(level=level)
 
-mongo_host = os.environ.get("MONGO_HOST")
-mongo_db = os.environ.get("MONGO_DB")
-
 executor = ThreadPoolExecutor(max_workers=10)
 
 app = Eve()
@@ -35,20 +33,32 @@ with app.app_context():
                       num_fetch_workers=num_fetch_workers)
 
 
+def done_callback(future):
+    scrape = future.result()
+    scrape["status"] = "PROCESSED"
+    storage.replace("scrapes", {"_id": scrape["_id"]}, scrape)
+
+
 def _scrape(scrape, num_pages=None):
     query = scrape["query"]
     scraper.scrape(query, num_pages)
 
-    storage.replace("scrapes", )
+    return scrape
+
+
+def inserted_scrapes(scrapes):
+    for scrape in scrapes:
+        future = executor.submit(_scrape, scrape=scrape, num_pages=10)
+        future.add_done_callback(done_callback)
 
 
 def insert_scrapes(scrapes):
     for scrape in scrapes:
         scrape["status"] = "CREATED"
-        executor.submit(_scrape, scrape=scrape, num_pages=10)
 
 
 app.on_insert_scrapes += insert_scrapes
+app.on_inserted_scrapes += inserted_scrapes
 
 
 if __name__ == "__main__":

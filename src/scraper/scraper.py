@@ -3,7 +3,7 @@ import random
 import time
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from math import ceil
 
 from scraper.parser import DetailsParser, SearchParser
@@ -55,8 +55,13 @@ class Scraper:
                 product["listing_id"], content)
             merged_product = {**product, **product_details}
 
+            today = datetime.combine(date.today(), datetime.min.time())
+            tomorrow = today + timedelta(days=1)
+
             self.storage.replace(self.collection_name, {
-                "listing_id": merged_product["listing_id"]}, merged_product)
+                "listing_id": merged_product["listing_id"],
+                "last_modified_date": {"$gte": today, "$lt": tomorrow}}, merged_product)
+
             return merged_product
         except Exception as e:
             logging.error(f"could get details: {e}")
