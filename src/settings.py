@@ -38,6 +38,7 @@ scrapes = {
 
 products = {
     'schema': {
+        'scraping_id': {"type": "string"},
         'listing_id': {"type": "string"},
         'num_sales': {"type": "integer"},
         'shipping_cost': {"type": "float"},

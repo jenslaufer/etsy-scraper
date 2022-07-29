@@ -66,7 +66,7 @@ class Scraper:
         except Exception as e:
             logging.error(f"could get details: {e}")
 
-    def scrape(self, query, num_pages=None, fetch=True):
+    def scrape(self, scraping_id, query, num_pages=None, fetch=True):
         futures = []
         pages = []
 
@@ -99,6 +99,7 @@ class Scraper:
                 for parsing in parsings:
                     products = parsing.result()["products"]
                     for product in products:
+                        product["scraping_id"] = scraping_id
                         details_url = self.details_url_templ.format(
                             product["listing_id"])
                         details.append(executor.submit(

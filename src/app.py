@@ -41,7 +41,7 @@ def done_callback(future):
 
 def _scrape(scrape, num_pages=None):
     query = scrape["query"]
-    scraper.scrape(query, num_pages)
+    scraper.scrape(scrape["_id"], query, num_pages)
 
     return scrape
 

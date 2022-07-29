@@ -27,8 +27,8 @@ class ScraperTest(TestCase):
 
     def test_scraping(self):
         num_pages = 2
-        futures = self.scraper.scrape(
-            self.query, num_pages=num_pages)
+        futures = self.scraper.scrape("0815",
+                                      self.query, num_pages=num_pages)
 
         self.assertEqual(len(futures), 24)
 
