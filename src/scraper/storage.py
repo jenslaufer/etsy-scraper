@@ -61,11 +61,11 @@ class MongoStorage(Storage):
             return self.fs.get_last_version(filename=filedata['filename']).read()
 
     def save_file(self, identifier, content, encoding='utf-8',
-                  content_type='text/html', doc_type="search"):
+                  content_type='text/html', doc_type="search", ref=""):
         filename = '{}.html'.format(str(uuid.uuid4()))
         self.fs.put(content, filename=filename,
                     encoding=encoding, contentType=content_type,
-                    doc_type=doc_type, identifier=identifier)
+                    doc_type=doc_type, identifier=identifier, ref=ref)
 
     def find_by_criteria(self, collection_name, criteria={}):
         files_col = self.db[collection_name]

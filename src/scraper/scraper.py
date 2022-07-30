@@ -32,9 +32,9 @@ class Scraper:
         self.num_parsing_workers = num_parsing_workers
         self.collection_name = collection_name
 
-    def _fetch(self, url):
+    def _fetch(self, url, ref):
         content = self.fetcher.fetch(url)
-        self.storage.save_file(url, content)
+        self.storage.save_file(url, content, ref=ref)
 
         return content
 
@@ -47,9 +47,10 @@ class Scraper:
             self.storage.save(self.collection_name, product) """
         return {"search_url": search_url, "products": products}
 
-    def _merge_details(self, product, details_url):
+    def _merge_details(self, product, details_url, ref):
         content = self.fetcher.fetch(details_url)
-        self.storage.save_file(details_url, content, doc_type="details")
+        self.storage.save_file(details_url, content,
+                               doc_type="details", ref=ref)
         try:
             product_details = self.details_parser.parse(
                 product["listing_id"], content)
@@ -79,7 +80,7 @@ class Scraper:
                     parse.quote(query.encode('utf8')), page)
                 pages.append(search_url)
                 futures.append(executor.submit(
-                    self._fetch, url=search_url))
+                    self._fetch, url=search_url, ref=scraping_id))
 
                 if page == 1 and as_completed(futures):
                     result = futures[0].result()
@@ -103,6 +104,6 @@ class Scraper:
                         details_url = self.details_url_templ.format(
                             product["listing_id"])
                         details.append(executor.submit(
-                            self._merge_details, product=product, details_url=details_url))
+                            self._merge_details, product=product, details_url=details_url, ref=scraping_id))
 
         return details
