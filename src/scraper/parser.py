@@ -30,7 +30,7 @@ class SearchParser(Parser):
 
         return num_of_results
 
-    def _products(self, query, doc):
+    def _products(self, query, scraping_id, doc):
         products = []
         products_xpath = ".//li[contains(@class,'wt-list-unstyled')]"
         title_xpath = ".//a/@title"
@@ -40,7 +40,7 @@ class SearchParser(Parser):
         listing_id_xpath = ".//div[@data-listing-id]/@data-listing-id"
 
         for product_section in doc.xpath(products_xpath):
-            product = {}
+            product = {"scraping_id": scraping_id}
             try:
                 title = product_section.xpath(title_xpath)[0].strip()
                 product["title"] = title
@@ -80,13 +80,15 @@ class SearchParser(Parser):
             if len(product.keys()) > 0:
                 product["query"] = query
                 products.append(product)
+        products = [product for product in products if product.get(
+            "listing_id") != None]
 
         return products
 
-    def parse(self, query, content) -> dict:
+    def parse(self, query, scraping_id, content) -> dict:
         doc = html.fromstring(content)
         num_of_results = self._num_results(doc)
-        products = self._products(query, doc)
+        products = self._products(query, scraping_id, doc)
 
         return {"num_of_results": num_of_results, "products": products}
 

@@ -36,16 +36,15 @@ class Scraper:
         content = self.fetcher.fetch(url)
         self.storage.save_file(url, content, ref=ref)
 
-        return content
+        return {"content": content, "search_url": url, "scraping_id": ref}
 
-    def _parse_search_results(self, query, search_url):
-        content = self.storage.get_file_content(search_url)
-        result = self.search_parser.parse(query, content)
+    def _parse_search_results(self, query, result):
+        content = result["content"]
+        scraping_id = result["scraping_id"]
+        result = self.search_parser.parse(
+            query, scraping_id, content)
         products = result["products"]
-        """ for product in products:
-            product["search_url"] = search_url
-            self.storage.save(self.collection_name, product) """
-        return {"search_url": search_url, "products": products}
+        return products
 
     def _merge_details(self, product, details_url, ref):
         content = self.fetcher.fetch(details_url)
@@ -69,7 +68,6 @@ class Scraper:
 
     def scrape(self, scraping_id, query, num_pages=None, fetch=True):
         futures = []
-        pages = []
 
         with ThreadPoolExecutor(max_workers=self.num_fetch_workers) as executor:
             if num_pages is None:
@@ -78,32 +76,31 @@ class Scraper:
             for page in range(1, num_pages+1):
                 search_url = self.search_url_templ.format(
                     parse.quote(query.encode('utf8')), page)
-                pages.append(search_url)
                 futures.append(executor.submit(
                     self._fetch, url=search_url, ref=scraping_id))
 
-                if page == 1 and as_completed(futures):
-                    result = futures[0].result()
-                    if num_pages is None:
-                        num_pages = ceil(result["num_results"]/64)
+                # if page == 1 and as_completed(futures):
+                #     result = futures[0].result()
+                #     if num_pages is None:
+                #         num_pages = ceil(result["num_results"]/64)
 
         if as_completed(futures):
             parsings = []
             with ThreadPoolExecutor(max_workers=self.num_parsing_workers) as executor:
-                for page in pages:
+                for future in futures:
+                    result = future.result()
                     parsings.append(executor.submit(
-                        self._parse_search_results, query=query, search_url=page))
+                        self._parse_search_results, query=query, result=result))
 
         if as_completed(parsings):
             details = []
             with ThreadPoolExecutor(max_workers=self.num_fetch_workers) as executor:
                 for parsing in parsings:
-                    products = parsing.result()["products"]
+                    products = parsing.result()
                     for product in products:
-                        product["scraping_id"] = scraping_id
-                        details_url = self.details_url_templ.format(
-                            product["listing_id"])
-                        details.append(executor.submit(
-                            self._merge_details, product=product, details_url=details_url, ref=scraping_id))
-
-        return details
+                        if product.get("listing_id") != None:
+                            details_url = product.get("url")
+                            details.append(executor.submit(
+                                self._merge_details, product=product, details_url=details_url, ref=scraping_id))
+            if as_completed(details):
+                return details

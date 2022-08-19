@@ -5,13 +5,18 @@ from scraper.parser import SearchParser, DetailsParser
 from scraper.providers import RequestsFetch, Fetch
 from scraper.scraper import Scraper
 from pymongo_inmemory import MongoClient as MongoClientInMemory
+from pymongo import MongoClient as MongoClient
+import gridfs
 from concurrent.futures import as_completed
+import json
+import pandas as pd
 
 
 class ScraperTest(TestCase):
     def setUp(self):
         db_name = "test"
-        db = MongoClientInMemory()[db_name]
+        self.client = MongoClientInMemory()
+        db = self.client[db_name]
 
         self.collection_name = "products"
         self.storage = MongoStorage(db)
